@@ -8,9 +8,9 @@ from dataset import LibraryThings
 from modules.ItemEmbed import Network
 
 
-lr = 1e-2
+lr = 5e-3
 bs = 160000
-num_epochs = 200
+num_epochs = 1
 
 device = torch.device("cuda:0")
 train_data = LibraryThings('train')
@@ -24,7 +24,7 @@ criterion = nn.MSELoss(reduction='sum')
 optimizer = optim.Adam(net.parameters())
 
 for epoch in range(num_epochs):
-    losses = []
+    losses = 0
     net.train()
     for u, i, r in train_loader:
         u, i, r = u.to(device), i.to(device), r.to(device)
@@ -35,23 +35,18 @@ for epoch in range(num_epochs):
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-        losses.append(loss.item())
-    print(f"epoch {epoch}: loss {np.mean(losses)}")
+        losses += loss.item()
+    print(f"epoch {epoch}: loss {losses / len(train_data)}")
 
+net.eval()
+test_losses = 0
 for u, i, r in test_loader:
     u, i, r = u.to(device), i.to(device), r.to(device)
     pred = net(u, i)
     r = r.float().view(pred.size())
     loss = criterion(pred, r)
 
-    optimizer.zero_grad()
-    loss.backward()
-    optimizer.step()
-    losses.append(loss.item())
-print(f"epoch {epoch}: loss {np.mean(losses)}")
-
-    # for u, i, r in test_loader:
-print(f"pred: {pred}\n" 
-      f"r: {r}")
+    test_losses += loss.item()
+print(f"test loss {test_losses / len(test_data)}")
 
 print("DONE")
