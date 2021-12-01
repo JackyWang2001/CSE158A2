@@ -4,18 +4,18 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
 
-from dataset import LibraryThings
+from dataset import LibraryThings, LibraryThingsTest
 from modules.ItemEmbed import Network
 
 
 lr = 5e-3
-bs = 160000
-num_epochs = 1
+bs = 320000
+num_epochs = 300
 
 device = torch.device("cuda:0")
 train_data = LibraryThings('train')
 train_loader = DataLoader(train_data, batch_size=bs, num_workers=8)
-test_data = LibraryThings('test')
+test_data = LibraryThingsTest(train_data)
 test_loader = DataLoader(test_data, batch_size=bs, num_workers=8)
 net = Network(train_data.num_users, train_data.num_items)
 net = nn.DataParallel(net)
@@ -45,7 +45,6 @@ for u, i, r in test_loader:
     pred = net(u, i)
     r = r.float().view(pred.size())
     loss = criterion(pred, r)
-
     test_losses += loss.item()
 print(f"test loss {test_losses / len(test_data)}")
 

@@ -10,8 +10,8 @@ class Network(nn.Module):
         if hidden is None:
             hidden = [200, 100]
 
-        self.user_embedding = nn.Embedding(num_users, num_factors)
-        self.item_embedding = nn.Embedding(num_items, num_factors)
+        self.user_embedding = nn.Embedding(num_users+1, num_factors)
+        self.item_embedding = nn.Embedding(num_items+1, num_factors)
         self.fc1 = nn.Linear(num_factors * 2, hidden[0])
         self.fc2 = nn.Linear(hidden[0], hidden[1])
         self.out_layer = nn.Linear(hidden[1], 1)
@@ -32,6 +32,6 @@ class Network(nn.Module):
     def init_weights(self):
         self.item_embedding.weight.data.uniform_(-0.05, 0.05)
         self.user_embedding.weight.data.uniform_(-0.05, 0.05)
-        nn.init.xavier_uniform(self.fc1.weight)
-        nn.init.xavier_uniform(self.fc2.weight)
-        nn.init.xavier_uniform(self.out_layer.weight)
+        nn.init.xavier_uniform_(self.fc1.weight)
+        nn.init.xavier_uniform_(self.fc2.weight)
+        nn.init.xavier_uniform_(self.out_layer.weight)
